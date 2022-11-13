@@ -11,12 +11,12 @@ uint8_t inReg = 7;
 uint8_t clkReg = 6;
 uint8_t resetReg = 5;
 
-uint8_t led1 = A0;
-uint8_t led2 = A2;
-uint8_t led3 = A4;
-uint8_t led4 = A6;
-uint8_t potenciometro = A7;
-uint8_t velocidad = 500;
+// uint8_t led1 = A0;
+// uint8_t led2 = A2;
+// uint8_t led3 = A4;
+// uint8_t led4 = A6;
+// int potenciometro = A1;
+int velocidad = 500;
 // uint8_t clkReg = 6;
 // uint8_t resetReg = 5;
 
@@ -37,6 +37,7 @@ bool estaActiva = true;
 bool reiniciado = false;
 
 void displayNumber(int num);
+void inicializarReloj();
 
 AsyncTask relojVelocidad(velocidad, true, []() {
   flag = !flag;
@@ -48,10 +49,11 @@ AsyncTask relojVelocidad(velocidad, true, []() {
 
   if (tick == 2) digitalWrite(inReg, 0);
   if ((tick - 1) == limite) {
-    digitalWrite(led1, 1);
-    estaActiva = false;
+    // digitalWrite(led1, 1);
+    inicializarReloj();
     estado = 1;
   }
+  Serial.println(velocidad);
 });
 
 
@@ -64,22 +66,24 @@ void setup() {
   pinMode(clkReg, OUTPUT);
   pinMode(resetReg, OUTPUT);
 
-  pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);
-  pinMode(led3, OUTPUT);
-  pinMode(led4, OUTPUT);
+  // pinMode(led1, OUTPUT);
+  // pinMode(led2, OUTPUT);
+  // pinMode(led3, OUTPUT);
+  // pinMode(led4, OUTPUT);
 
   digitalWrite(inReg, 0);
   digitalWrite(clkReg, 1);
   digitalWrite(resetReg, 1);
 
-  digitalWrite(led1, 0);
-  digitalWrite(led2, 0);
-  digitalWrite(led3, 0);
-  digitalWrite(led4, 0);
+  // digitalWrite(led1, 0);
+  // digitalWrite(led2, 0);
+  // digitalWrite(led3, 0);
+  // digitalWrite(led4, 0);
 
   tm.init();
   tm.set(3);
+
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -103,29 +107,25 @@ void loop() {
 
       if (digitalRead(btnInicioParar) == nivelActivo) {
         delay(espera);
-        digitalWrite(resetReg, 0);
-        digitalWrite(resetReg, 1);
-        digitalWrite(inReg, 1);
-        tick = 0;
-        flag = false;
-        estado = 2;
-        estaActiva = true;
+        inicializarReloj();
         relojVelocidad.Start();
       }
-      digitalWrite(led2, 1);
+      // digitalWrite(led2, 1);
       break;
     case 2:
       if (digitalRead(btnAumenta) == nivelActivo || digitalRead(btnDisminuye) == nivelActivo) {
         delay(espera);
+        estaActiva = false;
         relojVelocidad.Stop();
         estado = 1;
       }
-      digitalWrite(led2, 0);
+      // digitalWrite(led2, 0);
       break;
   }
+  // relojVelocidad.Update();
   if (estaActiva) relojVelocidad.Update();
-  else relojVelocidad.Stop();
-  velocidad = analogRead(potenciometro);
+  velocidad = analogRead(A1);
+  delay(1);
 }
 
 void displayNumber(int num) {
@@ -140,4 +140,14 @@ void displayLimite(int num) {
   tm.display(0, num / 10 % 10);
   // tm.display(1, num / 100 % 10);
   // tm.display(0, num / 1000 % 10);
+}
+
+void inicializarReloj() {
+  digitalWrite(resetReg, 0);
+  digitalWrite(resetReg, 1);
+  digitalWrite(inReg, 1);
+  estaActiva = true;
+  tick = 0;
+  flag = false;
+  estado = 2;
 }
