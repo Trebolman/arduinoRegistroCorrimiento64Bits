@@ -12,9 +12,11 @@ uint8_t clkReg = 6;
 uint8_t resetReg = 5;
 
 uint8_t led1 = A0;
-uint8_t led2 = A0;
-uint8_t led3 = A0;
-uint8_t led4 = A0;
+uint8_t led2 = A2;
+uint8_t led3 = A4;
+uint8_t led4 = A6;
+uint8_t potenciometro = A7;
+uint8_t velocidad = 500;
 // uint8_t clkReg = 6;
 // uint8_t resetReg = 5;
 
@@ -36,7 +38,7 @@ bool reiniciado = false;
 
 void displayNumber(int num);
 
-AsyncTask relojVelocidad(500, true, []() {
+AsyncTask relojVelocidad(velocidad, true, []() {
   flag = !flag;
   if (flag) {
     digitalWrite(clkReg, 1);
@@ -123,6 +125,7 @@ void loop() {
   }
   if (estaActiva) relojVelocidad.Update();
   else relojVelocidad.Stop();
+  velocidad = analogRead(potenciometro);
 }
 
 void displayNumber(int num) {
